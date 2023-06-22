@@ -130,6 +130,8 @@ tfh
   pushconfig
   pushvars
   run
+    autoapply
+    create
     cancel
     discard
     list
