@@ -251,6 +251,49 @@ check_required () {
   return $missing
 }
 
+run_create () {
+  # ws_id="$1"
+  # autoapply=$1
+
+  if ! check_required token address; then
+    echoerr "must provide an authentication token and address"
+    return 1
+  fi
+
+  if [ -z "$ws_id" ]; then
+    if ! check_required org ws; then
+      echoerr "no workspace specified to list runs for"
+      return 1
+    fi
+
+    . "$JUNONIA_PATH/lib/tfh/cmd/tfh_workspace.sh"
+    if ! ws_id="$(_fetch_ws_id "$org" "$ws")"; then
+      return 1
+    fi
+
+    ws_name="$ws"
+  else
+    ws_name="$ws_id"
+  fi
+
+  echodebug "Creating run"
+  url="$address/api/v2/runs/"
+  if [ -x $1 ]; then
+    payload="{\"data\": { \"type\": \"runs\", \"relationships\": { \"workspace\": { \"data\": { \"type\": \"workspaces\", \"id\": \"$ws_id\" }}}}}"
+  else
+    payload="{\"data\": { \"attributes\": {  \"auto-apply\": \"true\", \"message\": \"Programatic_run\" }, \"type\": \"runs\", \"relationships\": { \"workspace\": { \"data\": { \"type\": \"workspaces\", \"id\": \"$ws_id\" }}}}}"
+  fi
+
+  # result=$(curl -s $curl_silent --header "Authorization: Bearer $token" --header "Content-Type: application/vnd.api+json" --request POST --data "$payload" "$url")
+  result=$(curl -s $curl_silent --header "Authorization: Bearer $token" --header "Content-Type: application/vnd.api+json" --request POST --data "$payload" "$url")
+
+  if [ $? -eq 0 ]; then
+    echo "$1 Run created"
+  else
+    echoerr "Run can not be created"
+  fi
+}
+
 tfh_junonia_filter () {
   readonly TFH_DEFAULT_CURLRC="$JUNONIA_CONFIGDIR/curlrc"
 
