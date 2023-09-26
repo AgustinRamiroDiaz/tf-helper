@@ -5,3 +5,5 @@ COPY --from=ghcr.io/jqlang/jq:1.7 /jq /usr/local/bin/jq
 WORKDIR /app
 RUN ln -s $PWD/tfh/bin/tfh /usr/local/bin/tfh
 COPY . .
+
+ENTRYPOINT [ "tfh" ]
